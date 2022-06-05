@@ -1,0 +1,47 @@
+{
+  "name": "kill-em-all",
+  "version": "0.0.0",
+  "type": "module",
+  "files": [
+    "dist",
+    "*.d.ts"
+  ],
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/*.d.ts"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "tsup --clean",
+    "dev": "tsup --watch",
+    "prepack": "rm -rf dist && pnpm build",
+    "test": "pnpm run /^test:/",
+    "test:unit": "vitest run",
+    "test:typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:lint": "eslint . --max-warnings 0 --ignore-pattern dist",
+    "test:package": "publint"
+  },
+  "description": "kill-em-all",
+  "license": "MIT",
+  "repository": "github:cyco130/kill-em-all",
+  "keywords": [
+    "react",
+    "vite",
+    "nextjs",
+    "ssr"
+  ],
+  "devDependencies": {
+    "@cyco130/eslint-config": "^6.1.1",
+    "@types/node": "^20.19.27",
+    "eslint": "^9.39.2",
+    "publint": "^0.3.16",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
+  }
+}
