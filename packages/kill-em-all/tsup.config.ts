@@ -2,11 +2,11 @@ import { defineConfig } from "tsup";
 
 export default defineConfig([
 	{
-		entry: ["./src/index.ts"],
+		entry: ["./src/index.ts", "./src/cli.ts"],
 		format: ["esm"],
 		platform: "node",
 		target: "node20",
 		sourcemap: true,
-		dts: true,
+		dts: { entry: ["./src/index.ts"] },
 	},
 ]);

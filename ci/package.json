@@ -1,0 +1,15 @@
+{
+  "name": "ci-react-vite-plugin-mdx",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "ci": "cross-env DEBUG=kill-em-all vitest --reporter=verbose run"
+  },
+  "dependencies": {
+    "@types/node": "^20.19.27",
+    "cross-env": "^10.1.0",
+    "kill-em-all": "workspace:*",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
+  }
+}

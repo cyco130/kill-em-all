@@ -16,6 +16,9 @@
       ]
     }
   },
+  "bin": {
+    "kill-em-all": "./dist/cli.js"
+  },
   "scripts": {
     "build": "tsup --clean",
     "dev": "tsup --watch",
@@ -26,14 +29,19 @@
     "test:lint": "eslint . --max-warnings 0 --ignore-pattern dist",
     "test:package": "publint"
   },
-  "description": "kill-em-all",
+  "description": "A utility to kill a process and all its child processes and wait for them to exit",
   "license": "MIT",
   "repository": "github:cyco130/kill-em-all",
   "keywords": [
-    "react",
-    "vite",
-    "nextjs",
-    "ssr"
+    "kill",
+    "process",
+    "tree",
+    "process tree",
+    "terminate",
+    "signal",
+    "windows",
+    "linux",
+    "macos"
   ],
   "devDependencies": {
     "@cyco130/eslint-config": "^6.1.1",
@@ -43,5 +51,8 @@
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16"
+  },
+  "dependencies": {
+    "@vscode/windows-process-tree": "^0.6.3"
   }
 }

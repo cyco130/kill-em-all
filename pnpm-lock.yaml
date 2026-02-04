@@ -20,9 +20,29 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
-  examples/basic: {}
+  ci:
+    dependencies:
+      "@types/node":
+        specifier: ^20.19.27
+        version: 20.19.30
+      cross-env:
+        specifier: ^10.1.0
+        version: 10.1.0
+      kill-em-all:
+        specifier: workspace:*
+        version: link:../packages/kill-em-all
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.16
+        version: 4.0.18(@types/node@20.19.30)(yaml@2.8.2)
 
-  packages/TODO:
+  packages/kill-em-all:
+    dependencies:
+      "@vscode/windows-process-tree":
+        specifier: ^0.6.3
+        version: 0.6.3
     devDependencies:
       "@cyco130/eslint-config":
         specifier: ^6.1.1
@@ -187,6 +207,12 @@ packages:
     resolution:
       {
         integrity: sha512-WI0DdZ8xFSbgMjR1sFsKABJ/C5OnRrjT06JXbZKexJGrDuPTzZdDYfFlsgcCXCyf+suG5QU2e/y1Wo2V/OapLQ==,
+      }
+
+  "@epic-web/invariant@1.0.0":
+    resolution:
+      {
+        integrity: sha512-lrTPqgvfFQtR/eY/qkIzp98OGdNJu0m5ji3q/nJI8v3SXkRKEnWiOxMmbvcSoAIzv/cGiuvRy57k4suKQSAdwA==,
       }
 
   "@esbuild/aix-ppc64@0.27.2":
@@ -1147,6 +1173,12 @@ packages:
         integrity: sha512-msMRKLMVLWygpK3u2Hybgi4MNjcYJvwTb0Ru09+fOyCXIgT5raYP041DRRdiJiI3k/2U6SEbAETB3YtBrUkCFA==,
       }
 
+  "@vscode/windows-process-tree@0.6.3":
+    resolution:
+      {
+        integrity: sha512-mjirLbtgjv7P6fwD8gx7iaY961EfGqUExGvfzsKl3spLfScg57ejlMi+7O1jfJqpM2Zly9DTSxyY4cFsDN6c9Q==,
+      }
+
   acorn-jsx@5.3.2:
     resolution:
       {
@@ -1468,6 +1500,14 @@ packages:
       {
         integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==,
       }
+
+  cross-env@10.1.0:
+    resolution:
+      {
+        integrity: sha512-GsYosgnACZTADcmEyJctkJIoqAhHjttw7RsFrVoJNXbsWWqaq6Ym+7kZjq6mS45O0jij6vtiReppKQEtqWy6Dw==,
+      }
+    engines: { node: ">=20" }
+    hasBin: true
 
   cross-spawn@7.0.6:
     resolution:
@@ -2603,6 +2643,13 @@ packages:
         integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==,
       }
 
+  node-addon-api@7.1.0:
+    resolution:
+      {
+        integrity: sha512-mNcltoe1R8o7STTegSOHdnJNN7s5EUvhoS7ShnTHDyOSd+8H+UdWODq6qSv67PjC8Zc5JRT8+oLAMCr0SIXw7g==,
+      }
+    engines: { node: ^16 || ^18 || >= 20 }
+
   node-releases@2.0.27:
     resolution:
       {
@@ -3699,6 +3746,8 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
+  "@epic-web/invariant@1.0.0": {}
+
   "@esbuild/aix-ppc64@0.27.2":
     optional: true
 
@@ -4164,6 +4213,10 @@ snapshots:
       "@vitest/pretty-format": 4.0.18
       tinyrainbow: 3.0.3
 
+  "@vscode/windows-process-tree@0.6.3":
+    dependencies:
+      node-addon-api: 7.1.0
+
   acorn-jsx@5.3.2(acorn@8.15.0):
     dependencies:
       acorn: 8.15.0
@@ -4352,6 +4405,11 @@ snapshots:
   consola@3.4.2: {}
 
   convert-source-map@2.0.0: {}
+
+  cross-env@10.1.0:
+    dependencies:
+      "@epic-web/invariant": 1.0.0
+      cross-spawn: 7.0.6
 
   cross-spawn@7.0.6:
     dependencies:
@@ -5135,6 +5193,8 @@ snapshots:
   napi-postinstall@0.3.4: {}
 
   natural-compare@1.4.0: {}
+
+  node-addon-api@7.1.0: {}
 
   node-releases@2.0.27: {}
 

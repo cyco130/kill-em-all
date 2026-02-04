@@ -1,7 +1,8 @@
 packages:
   - packages/*
-  - examples/*
+  - ci
 
 onlyBuiltDependencies:
+  - "@vscode/windows-process-tree"
   - esbuild
   - unrs-resolver
