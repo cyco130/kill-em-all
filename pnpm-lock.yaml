@@ -39,10 +39,6 @@ importers:
         version: 4.0.18(@types/node@20.19.30)(yaml@2.8.2)
 
   packages/kill-em-all:
-    dependencies:
-      "@vscode/windows-process-tree":
-        specifier: ^0.6.3
-        version: 0.6.3
     devDependencies:
       "@cyco130/eslint-config":
         specifier: ^6.1.1
@@ -1171,12 +1167,6 @@ packages:
     resolution:
       {
         integrity: sha512-msMRKLMVLWygpK3u2Hybgi4MNjcYJvwTb0Ru09+fOyCXIgT5raYP041DRRdiJiI3k/2U6SEbAETB3YtBrUkCFA==,
-      }
-
-  "@vscode/windows-process-tree@0.6.3":
-    resolution:
-      {
-        integrity: sha512-mjirLbtgjv7P6fwD8gx7iaY961EfGqUExGvfzsKl3spLfScg57ejlMi+7O1jfJqpM2Zly9DTSxyY4cFsDN6c9Q==,
       }
 
   acorn-jsx@5.3.2:
@@ -2642,13 +2632,6 @@ packages:
       {
         integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==,
       }
-
-  node-addon-api@7.1.0:
-    resolution:
-      {
-        integrity: sha512-mNcltoe1R8o7STTegSOHdnJNN7s5EUvhoS7ShnTHDyOSd+8H+UdWODq6qSv67PjC8Zc5JRT8+oLAMCr0SIXw7g==,
-      }
-    engines: { node: ^16 || ^18 || >= 20 }
 
   node-releases@2.0.27:
     resolution:
@@ -4213,10 +4196,6 @@ snapshots:
       "@vitest/pretty-format": 4.0.18
       tinyrainbow: 3.0.3
 
-  "@vscode/windows-process-tree@0.6.3":
-    dependencies:
-      node-addon-api: 7.1.0
-
   acorn-jsx@5.3.2(acorn@8.15.0):
     dependencies:
       acorn: 8.15.0
@@ -5193,8 +5172,6 @@ snapshots:
   napi-postinstall@0.3.4: {}
 
   natural-compare@1.4.0: {}
-
-  node-addon-api@7.1.0: {}
 
   node-releases@2.0.27: {}
 

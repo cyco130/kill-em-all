@@ -130,22 +130,6 @@ async function killProcess(
 }
 
 async function getChildProcessesRecursive(rootPid: number): Promise<number[]> {
-	// Use @vscode/windows-process-tree on Windows
-	if (process.platform === "win32") {
-		const { getProcessList } = await import("@vscode/windows-process-tree");
-		return await new Promise<number[]>((resolve) => {
-			getProcessList(rootPid, (processList) => {
-				resolve((processList ?? []).map((p) => p.pid));
-			});
-		});
-	} else {
-		return await getChildProcessesRecursivePosix(rootPid);
-	}
-}
-
-async function getChildProcessesRecursivePosix(
-	rootPid: number,
-): Promise<number[]> {
 	const allPids: number[] = [];
 	const stack: number[] = [rootPid];
 
@@ -161,7 +145,16 @@ async function getChildProcessesRecursivePosix(
 }
 
 async function getChildProcesses(pid: number): Promise<number[]> {
-	const pgrep = spawn(`pgrep -P ${pid}`, {
+	let command: string;
+	if (process.platform === "win32") {
+		// Using PowerShell to get child process IDs on Windows
+		command = `powershell -Command "Get-CimInstance Win32_Process -Filter 'ParentProcessId = ${pid}' | Select-Object -ExpandProperty ProcessId"`;
+	} else {
+		// Using pgrep to get child process IDs on Unix-like systems
+		command = `pgrep -P ${pid}`;
+	}
+
+	const pgrep = spawn(command, {
 		shell: true,
 		stdio: ["ignore", "pipe", "pipe"],
 	});

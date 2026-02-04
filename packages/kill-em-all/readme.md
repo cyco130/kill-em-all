@@ -11,7 +11,7 @@ Every other tool that I used to try to solve this problem in the past has one or
 - Not cross-platform
 - Outdated (e.g. relies on `wmic` on Windows which is no longer available)
 - Returns too early, before all processes exited
-- Doesn't handle zombie processes
+- Choke on zombie processes (also known as defunct processes)
 
 There are also packages that allow you to kill a process that keeps a port busy, but sometimes you have to deal with a wrapper process that simply relaunches the actual server process, rendering those tools ineffective.
 
@@ -49,9 +49,9 @@ npx kill-em-all <pid> [--signal <signal>] [--timeout <ms>] [--force-kill-after-t
 ## How it works
 
 - `kill-em-all` first identifies all child processes of the given PID recursively.
-  - It uses the `@vscode/windows-process-tree` package on Windows and the `pgrep` command-line utility on other platforms.
+  - It uses `pgrep` on POSIX systems and `Get-CimInstance` PowerShell command on Windows to find child processes.
 - It then sends the specified signal (defaulting to `SIGTERM`) to all processes in the tree.
-- It polls the processes to check if they have exited, waiting up to the specified timeout (defaulting to 5000ms).
+- It polls the processes to check if they have exited or became zombies, waiting up to the specified timeout (defaulting to 5000ms).
 - If any processes are still running and the `forceKillAfterTimeout` option is set, it sends `SIGKILL` to those processes and waits for them to exit for the specified `forceKillTimeoutMs` (defaulting to `timeoutMs`).
 - If any processes are still running after all attempts, it throws an error.
 
