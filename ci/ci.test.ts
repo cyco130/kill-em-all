@@ -1,20 +1,17 @@
 import { test } from "vitest";
-import { spawn } from "node:child_process";
+import { execSync, spawn } from "node:child_process";
 import { killEmAll } from "kill-em-all";
 
-test("ci", async () => {
-	const proc = spawn("node ./a.js", { stdio: "inherit", shell: true });
+test.sequential("wokrs as a library", async () => {
+	await doTest("library");
+});
 
-	// Wait until ready
-	const pid = await new Promise<number>((resolve, reject) => {
-		proc.on("spawn", () => {
-			if (proc.pid === undefined) {
-				reject(new Error("Spawned process has no PID"));
-			} else {
-				resolve(proc.pid);
-			}
-		});
-	});
+test.sequential("works as a CLI", async () => {
+	await doTest("CLI");
+});
+
+async function doTest(mode: "library" | "CLI") {
+	const pid = await spawnAndGetPid("node ./a.js");
 
 	// Poll until localhost:3000 is up
 	await new Promise<void>((resolve, reject) => {
@@ -44,7 +41,14 @@ test("ci", async () => {
 		}, checkInterval);
 	});
 
-	await killEmAll(pid, "SIGINT");
+	if (mode === "library") {
+		await killEmAll(pid, "SIGINT");
+	} else {
+		execSync(`pnpm exec kill-em-all ${pid} --signal SIGINT --timeout 10000`, {
+			stdio: "inherit",
+		});
+	}
+
 	console.log("All processes killed");
 
 	// Make sure localhost:3000 is down
@@ -55,4 +59,26 @@ test("ci", async () => {
 		// Expected error, server should be down
 		console.log("Server is down as expected");
 	}
-});
+}
+
+async function spawnAndGetPid(command: string): Promise<number> {
+	return new Promise<number>((resolve, reject) => {
+		try {
+			const proc = spawn(command, { stdio: "ignore", shell: true });
+
+			proc.on("spawn", () => {
+				if (proc.pid === undefined) {
+					reject(new Error("Spawned process has no PID"));
+				} else {
+					resolve(proc.pid);
+				}
+			});
+
+			proc.on("error", (err) => {
+				reject(err);
+			});
+		} catch (err) {
+			reject(err);
+		}
+	});
+}

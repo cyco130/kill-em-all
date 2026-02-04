@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 
-console.log("This is the C process");
+console.log("This is the C process", process.pid);
 
 const server = createServer((req, res) => {
 	res.writeHead(200, { "Content-Type": "text/plain" });
@@ -21,3 +21,11 @@ function shutdown() {
 
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
+
+setInterval(() => {
+	console.log("C is still alive", process.pid);
+}, 1000);
+
+process.on("exit", (code) => {
+	console.log(`C process exit event with code: ${code}, pid: ${process.pid}`);
+});
