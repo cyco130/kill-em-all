@@ -11,7 +11,7 @@ Every other tool that I used to try to solve this problem in the past has one or
 - Not cross-platform
 - Outdated (e.g. relies on `wmic` on Windows which is no longer available)
 - Returns too early, before all processes exited
-- Choke on zombie processes (also known as defunct processes)
+- Chokes on zombie processes (also known as defunct processes)
 
 There are also packages that allow you to kill a process that keeps a port busy, but sometimes you have to deal with a wrapper process that simply relaunches the actual server process, rendering those tools ineffective.
 
