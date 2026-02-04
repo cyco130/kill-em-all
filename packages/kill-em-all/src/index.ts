@@ -1,5 +1,8 @@
-import { spawn } from "node:child_process";
+import { exec, spawn } from "node:child_process";
 import { debug } from "./debug";
+import { promisify } from "node:util";
+
+const execAsync = promisify(exec);
 
 export interface KillEmAllOptions {
 	/**
@@ -67,6 +70,8 @@ async function killProcess(
 	signal: NodeJS.Signals | number,
 	abortSignal?: AbortSignal,
 ): Promise<void> {
+	let killed = false;
+
 	try {
 		debug(`Sending signal ${signal} to process ${pid}`);
 		process.kill(pid, signal);
@@ -75,7 +80,16 @@ async function killProcess(
 		if ((err as NodeJS.ErrnoException).code !== "ESRCH") {
 			throw err;
 		}
+
+		killed = true;
 	}
+
+	if (killed) {
+		debug(`Process ${pid} is already dead.`);
+		return;
+	}
+
+	let zombieCheckCount = 0;
 
 	// Poll until the process exits
 	for (;;) {
@@ -84,8 +98,22 @@ async function killProcess(
 			return;
 		}
 
+		if (zombieCheckCount === 0) {
+			const isDefunct = await isZombie(pid);
+			if (isDefunct) {
+				debug(`Process ${pid} is a zombie, considering it exited.`);
+				break;
+			}
+
+			zombieCheckCount = 5;
+		}
+
+		zombieCheckCount--;
+
 		try {
 			process.kill(pid, 0); // Check if process is still alive
+			// debug(`Process ${pid} is still alive, waiting...`);
+
 			// If no error, process is still alive, wait a bit
 			await new Promise((resolve) => setTimeout(resolve, 100));
 		} catch (err) {
@@ -172,4 +200,28 @@ async function getChildProcesses(pid: number): Promise<number[]> {
 	}
 
 	return childPids;
+}
+
+async function isZombie(pid: number): Promise<boolean> {
+	if (process.platform === "win32") {
+		try {
+			// We query the process; if it exists but is not running,
+			// PowerShell will return the object. If it's fully gone, it returns null.
+			const cmd = `powershell -Command "Get-Process -Id ${pid} -ErrorAction SilentlyContinue | Select-Object -ExpandProperty HasExited"`;
+			const { stdout } = await execAsync(cmd);
+
+			return stdout.trim().toLowerCase() === "true";
+		} catch {
+			// If the process doesn't exist at all, it's definitely not a zombie
+			return false;
+		}
+	} else {
+		try {
+			// -o state= suppresses the header and returns just the state code (e.g., 'Z', 'S', 'R')
+			const { stdout } = await execAsync(`ps -p ${pid} -o state=`);
+			return stdout.trim().includes("Z");
+		} catch {
+			return true;
+		}
+	}
 }

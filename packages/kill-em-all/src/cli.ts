@@ -91,8 +91,6 @@ for (let i = 0; i < args.length; i++) {
 				printUsageAndExit(1);
 			}
 	}
-
-	i++;
 }
 
 if (pid === undefined) {

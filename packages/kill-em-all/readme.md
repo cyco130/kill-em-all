@@ -6,7 +6,14 @@
 
 In many scenarios, like end-to-end testing, you launch a process, interact with it (e.g. by sending HTTP requests to a server), and then kill it at the end of the test. However, when you spawn the command to start a process, it is often the case that you end up with the pid of a shell or intermediate process (like `npm`) instead of the actual process that does the work. Simply killing that pid may leave child processes running, leading to resource leaks like busy ports or orphaned processes, and unpredictable behavior like ugly terminal output after your program has exited.
 
-Every other tool that I used to try to solve this problem in the past is either not cross-platform, outdated (e.g. relies on `wmic` on Windows which is no longer available), or returns too early, before all processes exited. Some other packages allow you to kill the process that keeps a port busy, but sometimes you have to deal with a wrapper process that simply relaunches the actual server process, rendering those tools ineffective.
+Every other tool that I used to try to solve this problem in the past has one or more of the following issues:
+
+- Not cross-platform
+- Outdated (e.g. relies on `wmic` on Windows which is no longer available)
+- Returns too early, before all processes exited
+- Doesn't handle zombie processes
+
+There are also packages that allow you to kill a process that keeps a port busy, but sometimes you have to deal with a wrapper process that simply relaunches the actual server process, rendering those tools ineffective.
 
 `kill-em-all` aims to solve this problem in a reliable and cross-platform way.
 
