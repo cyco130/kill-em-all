@@ -2,7 +2,7 @@ import { test } from "vitest";
 import { execSync, spawn } from "node:child_process";
 import { killEmAll } from "kill-em-all";
 
-test.sequential("wokrs as a library", async () => {
+test.sequential("works as a library", async () => {
 	await doTest("library");
 });
 

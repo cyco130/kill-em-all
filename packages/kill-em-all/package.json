@@ -41,7 +41,8 @@
     "signal",
     "windows",
     "linux",
-    "macos"
+    "macos",
+    "wmic"
   ],
   "devDependencies": {
     "@cyco130/eslint-config": "^6.1.1",
