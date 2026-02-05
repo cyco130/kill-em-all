@@ -61,6 +61,30 @@ await killEmAll(
 
 The library also exports `getRecursiveChildProcesses` and `killProcesses` functions for more fine-grained control.
 
+Another convenience function `launchAndTest` is provided to launch a child process, run tests, and ensure the launched process and all its children are killed afterward:
+
+```ts
+import { launchAndTest } from "kill-em-all";
+
+const cleanup = await launchAndTest(
+  // Command to launch the server or a ChildProcess instance
+  "npm start",
+  // URL to poll for health check or a polling function that should return true when the server is ready
+  // or false otherwise.
+  "http://localhost:3000/health",
+  // Optional timeout for the health check (default is 60_000 ms)
+  10_000,
+);
+
+try {
+  await runSomeTests();
+} finally {
+  // This will kill the server and all its child processes
+  // It accepts a signal and options similar to killEmAll
+  await cleanup();
+}
+```
+
 ## CLI usage:
 
 ```bash

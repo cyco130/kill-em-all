@@ -1,4 +1,4 @@
-import { exec } from "node:child_process";
+import { ChildProcess, exec, spawn } from "node:child_process";
 import { debug } from "./debug";
 import { promisify } from "node:util";
 
@@ -238,4 +238,113 @@ async function safeExec(
 			}
 		});
 	});
+}
+
+export type LaunchAndTestCleanupFunction = (
+	signal?: NodeJS.Signals | undefined,
+	options?: KillEmAllOptions,
+) => Promise<void>;
+
+/**
+ * Launches a child process and waits until it is ready by polling a URL or calling a user-defined
+ * polling function. Returns a cleanup function to kill the process and its children.
+ *
+ * @param cpOrCommand ChildProcess instance or command string to launch the process.
+ * @param urlOrPollingFunction URL string to poll or a function that returns a Promise<boolean> indicating readiness.
+ * @param timeoutMs Timeout in milliseconds to wait for the process to be ready. Default is 60000 ms.
+ *
+ * @returns A cleanup function that kills the launched process and its children.
+ *
+ * @throws Will throw an error if the process exits prematurely or if the timeout is reached before readiness.
+ */
+export async function launchAndTest(
+	cpOrCommand: ChildProcess | string,
+	urlOrPollingFunction: string | (() => Promise<boolean>),
+	timeoutMs = 60000,
+): Promise<LaunchAndTestCleanupFunction> {
+	let cp: ChildProcess;
+	if (typeof cpOrCommand === "string") {
+		cp = spawn(cpOrCommand, {
+			shell: true,
+			stdio: "inherit",
+		});
+	} else {
+		cp = cpOrCommand;
+	}
+
+	let { pid } = cp;
+
+	if (pid === undefined) {
+		await new Promise<void>((resolve, reject) => {
+			cp!.on("error", (error) => {
+				reject(error);
+			});
+
+			cp!.on("spawn", () => {
+				if (!cp.pid) {
+					reject(new Error("Failed to get process PID"));
+					return;
+				}
+
+				pid = cp.pid;
+				resolve();
+			});
+		});
+	}
+
+	if (cp.exitCode !== null) {
+		throw new Error(`Process exited prematurely with code ${cp.exitCode}`);
+	}
+
+	const timeout = AbortSignal.timeout(timeoutMs);
+
+	// eslint-disable-next-line no-async-promise-executor
+	await new Promise<void>(async (resolve, reject) => {
+		cp!.on("exit", (code) => {
+			if (code !== 0) {
+				reject(new Error(`Process exited prematurely with code ${code}`));
+			}
+		});
+
+		const pollingFunction =
+			typeof urlOrPollingFunction === "string"
+				? async () => {
+						try {
+							const response = await fetch(urlOrPollingFunction);
+							return response.ok;
+						} catch {
+							return false;
+						}
+					}
+				: urlOrPollingFunction;
+
+		for (;;) {
+			const done = await pollingFunction().catch((err) => {
+				reject(err);
+				throw err;
+			});
+
+			if (done) {
+				break;
+			}
+
+			if (timeout.aborted) {
+				reject(new Error("Timeout waiting for process to be ready"));
+				break;
+			}
+
+			await new Promise((resolve) => setTimeout(resolve, 100));
+		}
+
+		resolve();
+	});
+
+	const allPids = await getRecursiveChildProcesses(pid!);
+
+	return async function cleanup(
+		signal?: NodeJS.Signals,
+		options?: KillEmAllOptions,
+	) {
+		await killProcesses(allPids, signal, options);
+	};
 }
