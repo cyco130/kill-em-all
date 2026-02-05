@@ -1,6 +1,6 @@
 import { test } from "vitest";
 import { execSync, spawn } from "node:child_process";
-import { killEmAll } from "kill-em-all";
+import { killEmAll, launchAndTest } from "kill-em-all";
 
 test.sequential("works as a library", async () => {
 	await doTest("library");
@@ -8,6 +8,29 @@ test.sequential("works as a library", async () => {
 
 test.sequential("works as a CLI", async () => {
 	await doTest("CLI");
+});
+
+test.sequential("launchAndTest", async () => {
+	const kill = await launchAndTest("node ./a.js", "http://localhost:3000");
+
+	try {
+		const response = await fetch("http://localhost:3000");
+		if (!response.ok) {
+			throw new Error("Server did not respond with 200 OK");
+		}
+	} finally {
+		await kill();
+		console.log("All processes killed");
+	}
+
+	// Make sure localhost:3000 is down
+	try {
+		await fetch("http://localhost:3000");
+		throw new Error("Server is still running after killEmAll");
+	} catch {
+		// Expected error, server should be down
+		console.log("Server is down as expected");
+	}
 });
 
 async function doTest(mode: "library" | "CLI") {
