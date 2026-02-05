@@ -45,12 +45,12 @@
     "wmic"
   ],
   "devDependencies": {
-    "@cyco130/eslint-config": "^6.1.1",
-    "@types/node": "^20.19.27",
+    "@cyco130/eslint-config": "^6.1.2",
+    "@types/node": "^20.19.32",
     "eslint": "^9.39.2",
-    "publint": "^0.3.16",
+    "publint": "^0.3.17",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.18"
   }
 }
