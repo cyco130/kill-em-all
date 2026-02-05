@@ -59,6 +59,8 @@ await killEmAll(
 );
 ```
 
+The library also exports `getRecursiveChildProcesses` and `killProcesses` functions for more fine-grained control.
+
 ## CLI usage:
 
 ```bash

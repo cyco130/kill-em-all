@@ -1,4 +1,4 @@
-import { exec, spawn } from "node:child_process";
+import { exec } from "node:child_process";
 import { debug } from "./debug";
 import { promisify } from "node:util";
 
@@ -34,6 +34,24 @@ export interface KillEmAllOptions {
 export async function killEmAll(
 	pid: number,
 	signal: NodeJS.Signals | number = "SIGTERM",
+	options?: KillEmAllOptions,
+): Promise<void> {
+	const pids = await getRecursiveChildProcesses(pid);
+	await killProcesses(pids, signal, options);
+}
+
+/**
+ * Kills the given list of PIDs and waits for them to exit.
+ *
+ * @param pids The list of PIDs to kill.
+ * @param signal The signal to send to the processes (e.g., 'SIGTERM', 'SIGKILL').
+ * @param options Optional settings for timeouts and force killing.
+ *
+ * @throws Will throw an error if unable to kill the processes within the specified timeouts.
+ */
+export async function killProcesses(
+	pids: number[],
+	signal: NodeJS.Signals | number = "SIGTERM",
 	options: KillEmAllOptions = {},
 ): Promise<void> {
 	const {
@@ -42,7 +60,6 @@ export async function killEmAll(
 		forceKillTimeoutMs = timeoutMs,
 	} = options;
 
-	const pids = await getChildProcessesRecursive(pid);
 	debug(`Killing processes: ${pids.join(", ")}`);
 
 	let timeout = AbortSignal.timeout(timeoutMs);
@@ -59,9 +76,7 @@ export async function killEmAll(
 	}
 
 	if (timeout.aborted) {
-		throw new Error(
-			`Failed to kill process tree with root PID ${pid} within timeout.`,
-		);
+		throw new Error(`Failed to kill processes within timeout`);
 	}
 }
 
@@ -129,7 +144,14 @@ async function killProcess(
 	debug(`Process ${pid} has exited.`);
 }
 
-async function getChildProcessesRecursive(rootPid: number): Promise<number[]> {
+/**
+ * Gets all child processes of the given root PID recursively.
+ *
+ * @param rootPid The root process ID.
+ */
+export async function getRecursiveChildProcesses(
+	rootPid: number,
+): Promise<number[]> {
 	const allPids: number[] = [];
 	const stack: number[] = [rootPid];
 
@@ -154,42 +176,27 @@ async function getChildProcesses(pid: number): Promise<number[]> {
 		command = `pgrep -P ${pid}`;
 	}
 
-	const pgrep = spawn(command, {
-		shell: true,
-		stdio: ["ignore", "pipe", "pipe"],
-	});
+	debug(`Getting child processes of PID ${pid} with command: ${command}`);
+	const output = await safeExec(command);
 
-	pgrep.stdout.setEncoding("utf-8");
-	pgrep.stderr.setEncoding("utf-8");
+	debug(output);
+
+	if (output.stderr) {
+		throw new Error(`Failed to get child processes: ${output.stderr}`);
+	}
+
+	if (output.exitCode !== 0) {
+		return [];
+	}
 
 	const childPids: number[] = [];
-	pgrep.stdout.on("data", (data: string) => {
-		const lines = data.split("\n").filter((line) => line.trim() !== "");
-		for (const line of lines) {
-			const childPid = parseInt(line, 10);
-			if (!isNaN(childPid)) {
-				childPids.push(childPid);
-			}
+
+	const lines = output.stdout.split("\n").filter((line) => line.trim() !== "");
+	for (const line of lines) {
+		const childPid = parseInt(line.trim(), 10);
+		if (!isNaN(childPid)) {
+			childPids.push(childPid);
 		}
-	});
-
-	let stderrData = "";
-	pgrep.stderr.on("data", (data: string) => {
-		stderrData += data;
-	});
-
-	await new Promise<void>((resolve, reject) => {
-		pgrep.on("error", (err) => {
-			reject(new Error(`Failed to start pgrep: ${err.message}`));
-		});
-
-		pgrep.on("close", () => {
-			resolve();
-		});
-	});
-
-	if (stderrData) {
-		throw new Error(`pgrep failed with error: ${stderrData}`);
 	}
 
 	return childPids;
@@ -217,4 +224,18 @@ async function isZombie(pid: number): Promise<boolean> {
 			return true;
 		}
 	}
+}
+
+async function safeExec(
+	command: string,
+): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+	return await new Promise((resolve) => {
+		exec(command, (error, stdout, stderr) => {
+			if (error) {
+				resolve({ exitCode: error.code ?? -1, stdout, stderr });
+			} else {
+				resolve({ exitCode: 0, stdout, stderr });
+			}
+		});
+	});
 }
