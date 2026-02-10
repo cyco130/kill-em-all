@@ -1,5 +1,8 @@
 {
 	"compilerOptions": {
+		"noEmit": true,
+
+		"allowJs": true,
 		"checkJs": true,
 		"forceConsistentCasingInFileNames": true,
 		"skipLibCheck": true,
@@ -15,9 +18,8 @@
 		"moduleDetection": "force",
 		"resolveJsonModule": true,
 		"customConditions": ["import"],
-		"noEmit": true,
 
-		"target": "es2020",
+		"target": "es2022",
 		"lib": ["es2022"]
 	},
 	"exclude": ["node_modules", "dist"]
