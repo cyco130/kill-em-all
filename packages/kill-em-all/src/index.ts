@@ -96,16 +96,20 @@ async function killProcess(
 			process.kill(pid, signal);
 		}
 	} catch (err) {
+		const nodeErr = err as NodeJS.ErrnoException;
 		// Process might have already exited
 		if (
-			(err as NodeJS.ErrnoException).code !== "ESRCH" ||
-			(process.platform === "win32" &&
-				(err as NodeJS.ErrnoException).code !== "EPERM")
+			nodeErr.code === "ESRCH" ||
+			(process.platform === "win32" && nodeErr.code === "EPERM")
 		) {
-			throw err;
+			debug(
+				`Process ${pid} does not exist or cannot be accessed, it might have already exited.`,
+			);
+			killed = true;
+			return;
 		}
 
-		killed = true;
+		throw err;
 	}
 
 	if (killed) {
@@ -141,12 +145,16 @@ async function killProcess(
 			// If no error, process is still alive, wait a bit
 			await new Promise((resolve) => setTimeout(resolve, 100));
 		} catch (err) {
-			if ((err as NodeJS.ErrnoException).code === "ESRCH") {
+			const nodeErr = err as NodeJS.ErrnoException;
+			if (
+				nodeErr.code === "ESRCH" ||
+				(process.platform === "win32" && nodeErr.code === "EPERM")
+			) {
 				// Process does not exist anymore
-				break;
-			} else {
-				throw err; // Some other error occurred
+				return;
 			}
+
+			throw err; // Some other error occurred
 		}
 	}
 
