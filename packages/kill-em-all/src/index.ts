@@ -89,14 +89,27 @@ async function killProcess(
 
 	try {
 		debug(`Sending signal ${signal} to process ${pid}`);
-		process.kill(pid, signal);
+		if (process.platform === "win32" && signal === "SIGKILL") {
+			// On Windows, SIGKILL is not supported. We can use taskkill to force kill the process.
+			await safeExec(`taskkill /PID ${pid} /F`);
+		} else {
+			process.kill(pid, signal);
+		}
 	} catch (err) {
+		const nodeErr = err as NodeJS.ErrnoException;
 		// Process might have already exited
-		if ((err as NodeJS.ErrnoException).code !== "ESRCH") {
-			throw err;
+		if (
+			nodeErr.code === "ESRCH" ||
+			(process.platform === "win32" && nodeErr.code === "EPERM")
+		) {
+			debug(
+				`Process ${pid} does not exist or cannot be accessed, it might have already exited.`,
+			);
+			killed = true;
+			return;
 		}
 
-		killed = true;
+		throw err;
 	}
 
 	if (killed) {
@@ -132,12 +145,16 @@ async function killProcess(
 			// If no error, process is still alive, wait a bit
 			await new Promise((resolve) => setTimeout(resolve, 100));
 		} catch (err) {
-			if ((err as NodeJS.ErrnoException).code === "ESRCH") {
+			const nodeErr = err as NodeJS.ErrnoException;
+			if (
+				nodeErr.code === "ESRCH" ||
+				(process.platform === "win32" && nodeErr.code === "EPERM")
+			) {
 				// Process does not exist anymore
-				break;
-			} else {
-				throw err; // Some other error occurred
+				return;
 			}
+
+			throw err; // Some other error occurred
 		}
 	}
 
@@ -298,45 +315,87 @@ export async function launchAndTest(
 
 	const timeout = AbortSignal.timeout(timeoutMs);
 
+	let cleanupCalled = false;
+
+	debug(`Launched process with PID ${pid}, waiting for it to be ready...`);
 	// eslint-disable-next-line no-async-promise-executor
 	await new Promise<void>(async (resolve, reject) => {
-		cp!.on("exit", (code) => {
-			if (code !== 0) {
-				reject(new Error(`Process exited prematurely with code ${code}`));
+		function cleanup(reason: unknown) {
+			if (cleanupCalled) {
+				return;
 			}
-		});
+			cleanupCalled = true;
 
-		const pollingFunction =
-			typeof urlOrPollingFunction === "string"
-				? async () => {
-						try {
-							const response = await fetch(urlOrPollingFunction);
-							return response.ok;
-						} catch {
-							return false;
-						}
-					}
-				: urlOrPollingFunction;
+			debug(
+				`Cleaning up process ${pid} due to: ${reason instanceof Error ? reason.message : reason}`,
+			);
 
-		for (;;) {
-			const done = await pollingFunction().catch((err) => {
-				reject(err);
-				throw err;
-			});
-
-			if (done) {
-				break;
-			}
-
-			if (timeout.aborted) {
-				reject(new Error("Timeout waiting for process to be ready"));
-				break;
-			}
-
-			await new Promise((resolve) => setTimeout(resolve, 100));
+			killEmAll(pid!, "SIGKILL", { timeoutMs: 5000 })
+				.finally(() => {
+					reject(reason);
+				})
+				.catch((error) => {
+					debug(`Failed to kill process ${pid} during cleanup: ${error}`);
+				});
 		}
 
-		resolve();
+		function onExit(code: number) {
+			if (code !== 0) {
+				cleanup(new Error(`Process exited prematurely with code ${code}`));
+			}
+		}
+
+		cp.on("exit", onExit);
+
+		try {
+			const pollingFunction =
+				typeof urlOrPollingFunction === "string"
+					? async () => {
+							try {
+								const response = await fetch(urlOrPollingFunction);
+								return response.ok;
+							} catch {
+								return false;
+							}
+						}
+					: urlOrPollingFunction;
+
+			for (;;) {
+				if (cleanupCalled) {
+					break;
+				}
+
+				debug(`Checking if process ${pid} is ready...`);
+				const done = await pollingFunction().catch((err) => {
+					cleanup(err);
+					throw err;
+				});
+				debug(`Polling result for process ${pid}: ${done}`);
+
+				if (done) {
+					break;
+				}
+
+				if (timeout.aborted) {
+					cleanup(new Error("Timeout waiting for process to be ready"));
+					break;
+				}
+
+				await new Promise((resolve) => setTimeout(resolve, 100));
+			}
+
+			if (cleanupCalled) {
+				return;
+			}
+
+			resolve();
+		} catch (err) {
+			if (!cleanupCalled) {
+				cleanup(err);
+			}
+		}
+
+		cp.off("exit", onExit);
 	});
 
 	const allPids = await getRecursiveChildProcesses(pid!);
