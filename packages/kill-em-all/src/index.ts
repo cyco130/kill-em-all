@@ -106,10 +106,9 @@ async function killProcess(
 				`Process ${pid} does not exist or cannot be accessed, it might have already exited.`,
 			);
 			killed = true;
-			return;
+		} else {
+			throw err;
 		}
-
-		throw err;
 	}
 
 	if (killed) {
@@ -150,11 +149,10 @@ async function killProcess(
 				nodeErr.code === "ESRCH" ||
 				(process.platform === "win32" && nodeErr.code === "EPERM")
 			) {
-				// Process does not exist anymore
-				return;
+				// Process does not exist anymore, do nothing
+			} else {
+				throw err; // Some other error occurred
 			}
-
-			throw err; // Some other error occurred
 		}
 	}
 
