@@ -63,17 +63,22 @@ export async function killProcesses(
 	debug(`Killing processes: ${pids.join(", ")}`);
 
 	let timeout = AbortSignal.timeout(timeoutMs);
+	debug(`Set up initial timeout of ${timeoutMs} ms`);
 	await Promise.all(pids.map((pid) => killProcess(pid, signal, timeout)));
 
+	if (
+		timeout.aborted &&
+		forceKillAfterTimeout &&
+		signal !== "SIGKILL" &&
+		signal !== 9
+	) {
+		timeout = AbortSignal.timeout(forceKillTimeoutMs);
+		debug(`Set up force kill timeout of ${forceKillTimeoutMs} ms`);
+		await Promise.all(pids.map((pid) => killProcess(pid, "SIGKILL", timeout)));
+	}
+
 	if (timeout.aborted) {
-		if (forceKillAfterTimeout && signal !== "SIGKILL" && signal !== 9) {
-			timeout = AbortSignal.timeout(forceKillTimeoutMs);
-			await Promise.all(
-				pids.map((pid) => killProcess(pid, "SIGKILL", timeout)),
-			);
-		} else {
-			throw new Error(`Failed to kill processes within timeout`);
-		}
+		throw new Error(`Failed to kill processes within timeout`);
 	}
 }
 
@@ -139,7 +144,7 @@ async function killProcess(
 
 		try {
 			process.kill(pid, 0); // Check if process is still alive
-			// debug(`Process ${pid} is still alive, waiting...`);
+			// debug(`Process ${pid} is still alive, waiting.`);
 
 			// If no error, process is still alive, wait a bit
 			await new Promise((resolve) => setTimeout(resolve, 100));
@@ -149,7 +154,9 @@ async function killProcess(
 				nodeErr.code === "ESRCH" ||
 				(process.platform === "win32" && nodeErr.code === "EPERM")
 			) {
-				// Process does not exist anymore, do nothing
+				// Process does not exist anymore, break the loop
+				debug(`Process ${pid} does not exist anymore, it might have exited.`);
+				break;
 			} else {
 				throw err; // Some other error occurred
 			}
@@ -218,6 +225,7 @@ async function getChildProcesses(pid: number): Promise<number[]> {
 }
 
 async function isZombie(pid: number): Promise<boolean> {
+	// debug(`Checking if process ${pid} is a zombie...`);
 	if (process.platform === "win32") {
 		try {
 			// We query the process; if it exists but is not running,
