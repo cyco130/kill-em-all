@@ -2,12 +2,15 @@ import { test } from "vitest";
 import { execSync, spawn } from "node:child_process";
 import { killEmAll, launchAndTest } from "kill-em-all";
 
+const TEST_TIMEOUT = 60_000; // 60 seconds
+const KILL_TIMEOUT = 10_000; // 10 seconds
+
 test.sequential(
 	"works as a library",
 	async () => {
 		await doTest("library");
 	},
-	60_000,
+	TEST_TIMEOUT,
 );
 
 test.sequential(
@@ -15,7 +18,7 @@ test.sequential(
 	async () => {
 		await doTest("CLI");
 	},
-	60_000,
+	TEST_TIMEOUT,
 );
 
 test.sequential(
@@ -29,7 +32,7 @@ test.sequential(
 				throw new Error("Server did not respond with 200 OK");
 			}
 		} finally {
-			await kill("SIGINT", { timeoutMs: 10_000 });
+			await kill("SIGINT", { timeoutMs: KILL_TIMEOUT });
 			console.log("All processes killed");
 		}
 
@@ -42,7 +45,7 @@ test.sequential(
 			console.log("Server is down as expected");
 		}
 	},
-	60_000,
+	TEST_TIMEOUT,
 );
 
 async function doTest(mode: "library" | "CLI") {
@@ -77,11 +80,14 @@ async function doTest(mode: "library" | "CLI") {
 	});
 
 	if (mode === "library") {
-		await killEmAll(pid, "SIGINT", { timeoutMs: 10_000 });
+		await killEmAll(pid, "SIGINT", { timeoutMs: KILL_TIMEOUT });
 	} else {
-		execSync(`pnpm exec kill-em-all ${pid} --signal SIGINT --timeout 10000`, {
-			stdio: "inherit",
-		});
+		execSync(
+			`pnpm exec kill-em-all ${pid} --signal SIGINT --timeout ${KILL_TIMEOUT}`,
+			{
+				stdio: "inherit",
+			},
+		);
 	}
 
 	console.log("All processes killed");
