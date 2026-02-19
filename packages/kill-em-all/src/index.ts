@@ -65,18 +65,15 @@ export async function killProcesses(
 	let timeout = AbortSignal.timeout(timeoutMs);
 	await Promise.all(pids.map((pid) => killProcess(pid, signal, timeout)));
 
-	if (
-		timeout.aborted &&
-		forceKillAfterTimeout &&
-		signal !== "SIGKILL" &&
-		signal !== 9
-	) {
-		timeout = AbortSignal.timeout(forceKillTimeoutMs);
-		await Promise.all(pids.map((pid) => killProcess(pid, "SIGKILL", timeout)));
-	}
-
 	if (timeout.aborted) {
-		throw new Error(`Failed to kill processes within timeout`);
+		if (forceKillAfterTimeout && signal !== "SIGKILL" && signal !== 9) {
+			timeout = AbortSignal.timeout(forceKillTimeoutMs);
+			await Promise.all(
+				pids.map((pid) => killProcess(pid, "SIGKILL", timeout)),
+			);
+		} else {
+			throw new Error(`Failed to kill processes within timeout`);
+		}
 	}
 }
 
@@ -89,8 +86,11 @@ async function killProcess(
 
 	try {
 		debug(`Sending signal ${signal} to process ${pid}`);
-		if (process.platform === "win32" && signal === "SIGKILL") {
-			// On Windows, SIGKILL is not supported. We can use taskkill to force kill the process.
+		if (
+			process.platform === "win32" &&
+			(signal === "SIGKILL" || signal === 9)
+		) {
+			// On Windows, taskkill /F is more reliable
 			await safeExec(`taskkill /PID ${pid} /F`);
 		} else {
 			process.kill(pid, signal);
@@ -106,10 +106,9 @@ async function killProcess(
 				`Process ${pid} does not exist or cannot be accessed, it might have already exited.`,
 			);
 			killed = true;
-			return;
+		} else {
+			throw err;
 		}
-
-		throw err;
 	}
 
 	if (killed) {
@@ -150,11 +149,10 @@ async function killProcess(
 				nodeErr.code === "ESRCH" ||
 				(process.platform === "win32" && nodeErr.code === "EPERM")
 			) {
-				// Process does not exist anymore
-				return;
+				// Process does not exist anymore, do nothing
+			} else {
+				throw err; // Some other error occurred
 			}
-
-			throw err; // Some other error occurred
 		}
 	}
 
