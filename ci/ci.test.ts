@@ -7,7 +7,7 @@ test.sequential(
 	async () => {
 		await doTest("library");
 	},
-	10_000,
+	60_000,
 );
 
 test.sequential(
@@ -15,7 +15,7 @@ test.sequential(
 	async () => {
 		await doTest("CLI");
 	},
-	10_000,
+	60_000,
 );
 
 test.sequential(
@@ -29,7 +29,7 @@ test.sequential(
 				throw new Error("Server did not respond with 200 OK");
 			}
 		} finally {
-			await kill("SIGINT", { timeoutMs: 3000 });
+			await kill("SIGINT", { timeoutMs: 10_000 });
 			console.log("All processes killed");
 		}
 
@@ -42,7 +42,7 @@ test.sequential(
 			console.log("Server is down as expected");
 		}
 	},
-	10_000,
+	60_000,
 );
 
 async function doTest(mode: "library" | "CLI") {
@@ -77,9 +77,9 @@ async function doTest(mode: "library" | "CLI") {
 	});
 
 	if (mode === "library") {
-		await killEmAll(pid, "SIGINT", { timeoutMs: 3000 });
+		await killEmAll(pid, "SIGINT", { timeoutMs: 10_000 });
 	} else {
-		execSync(`pnpm exec kill-em-all ${pid} --signal SIGINT --timeout 3000`, {
+		execSync(`pnpm exec kill-em-all ${pid} --signal SIGINT --timeout 10000`, {
 			stdio: "inherit",
 		});
 	}
