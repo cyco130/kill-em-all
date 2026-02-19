@@ -143,9 +143,8 @@ async function killProcess(
 		zombieCheckCount--;
 
 		try {
-			debug(`Checking if process ${pid} is still alive.`);
 			process.kill(pid, 0); // Check if process is still alive
-			debug(`Process ${pid} is still alive, waiting.`);
+			// debug(`Process ${pid} is still alive, waiting.`);
 
 			// If no error, process is still alive, wait a bit
 			await new Promise((resolve) => setTimeout(resolve, 100));
@@ -156,7 +155,7 @@ async function killProcess(
 				(process.platform === "win32" && nodeErr.code === "EPERM")
 			) {
 				// Process does not exist anymore, break the loop
-				debug(`Process ${pid} does not exist anymore, it has exited.`);
+				debug(`Process ${pid} does not exist anymore, it might have exited.`);
 				break;
 			} else {
 				throw err; // Some other error occurred
@@ -226,7 +225,7 @@ async function getChildProcesses(pid: number): Promise<number[]> {
 }
 
 async function isZombie(pid: number): Promise<boolean> {
-	debug(`Checking if process ${pid} is a zombie...`);
+	// debug(`Checking if process ${pid} is a zombie...`);
 	if (process.platform === "win32") {
 		try {
 			// We query the process; if it exists but is not running,
