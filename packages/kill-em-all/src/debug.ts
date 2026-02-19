@@ -11,6 +11,6 @@ const shouldDebug =
 
 export function debug(...args: any[]) {
 	if (shouldDebug) {
-		console.error("[kill-em-all]", ...args);
+		console.error(`[kill-em-all] ${new Date().toISOString()}`, ...args);
 	}
 }
