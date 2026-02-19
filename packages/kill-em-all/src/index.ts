@@ -65,15 +65,18 @@ export async function killProcesses(
 	let timeout = AbortSignal.timeout(timeoutMs);
 	await Promise.all(pids.map((pid) => killProcess(pid, signal, timeout)));
 
+	if (
+		timeout.aborted &&
+		forceKillAfterTimeout &&
+		signal !== "SIGKILL" &&
+		signal !== 9
+	) {
+		timeout = AbortSignal.timeout(forceKillTimeoutMs);
+		await Promise.all(pids.map((pid) => killProcess(pid, "SIGKILL", timeout)));
+	}
+
 	if (timeout.aborted) {
-		if (forceKillAfterTimeout && signal !== "SIGKILL" && signal !== 9) {
-			timeout = AbortSignal.timeout(forceKillTimeoutMs);
-			await Promise.all(
-				pids.map((pid) => killProcess(pid, "SIGKILL", timeout)),
-			);
-		} else {
-			throw new Error(`Failed to kill processes within timeout`);
-		}
+		throw new Error(`Failed to kill processes within timeout`);
 	}
 }
 
