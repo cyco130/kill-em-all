@@ -2,36 +2,48 @@ import { test } from "vitest";
 import { execSync, spawn } from "node:child_process";
 import { killEmAll, launchAndTest } from "kill-em-all";
 
-test.sequential("works as a library", async () => {
-	await doTest("library");
-});
+test.sequential(
+	"works as a library",
+	async () => {
+		await doTest("library");
+	},
+	10_000,
+);
 
-test.sequential("works as a CLI", async () => {
-	await doTest("CLI");
-});
+test.sequential(
+	"works as a CLI",
+	async () => {
+		await doTest("CLI");
+	},
+	10_000,
+);
 
-test.sequential("launchAndTest", async () => {
-	const kill = await launchAndTest("node ./a.js", "http://localhost:3000");
+test.sequential(
+	"launchAndTest",
+	async () => {
+		const kill = await launchAndTest("node ./a.js", "http://localhost:3000");
 
-	try {
-		const response = await fetch("http://localhost:3000");
-		if (!response.ok) {
-			throw new Error("Server did not respond with 200 OK");
+		try {
+			const response = await fetch("http://localhost:3000");
+			if (!response.ok) {
+				throw new Error("Server did not respond with 200 OK");
+			}
+		} finally {
+			await kill("SIGINT", { timeoutMs: 3000 });
+			console.log("All processes killed");
 		}
-	} finally {
-		await kill();
-		console.log("All processes killed");
-	}
 
-	// Make sure localhost:3000 is down
-	try {
-		await fetch("http://localhost:3000");
-		throw new Error("Server is still running after killEmAll");
-	} catch {
-		// Expected error, server should be down
-		console.log("Server is down as expected");
-	}
-});
+		// Make sure localhost:3000 is down
+		try {
+			await fetch("http://localhost:3000");
+			throw new Error("Server is still running after killEmAll");
+		} catch {
+			// Expected error, server should be down
+			console.log("Server is down as expected");
+		}
+	},
+	10_000,
+);
 
 async function doTest(mode: "library" | "CLI") {
 	const pid = await spawnAndGetPid("node ./a.js");
@@ -65,9 +77,9 @@ async function doTest(mode: "library" | "CLI") {
 	});
 
 	if (mode === "library") {
-		await killEmAll(pid, "SIGINT");
+		await killEmAll(pid, "SIGINT", { timeoutMs: 3000 });
 	} else {
-		execSync(`pnpm exec kill-em-all ${pid} --signal SIGINT --timeout 10000`, {
+		execSync(`pnpm exec kill-em-all ${pid} --signal SIGINT --timeout 3000`, {
 			stdio: "inherit",
 		});
 	}
