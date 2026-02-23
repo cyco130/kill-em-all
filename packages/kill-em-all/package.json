@@ -17,11 +17,11 @@
     }
   },
   "bin": {
-    "kill-em-all": "./dist/cli.js"
+    "kill-em-all": "./cli.js"
   },
   "scripts": {
-    "build": "tsup --clean",
-    "dev": "tsup --watch",
+    "build": "tsdown --clean",
+    "dev": "tsdown --watch",
     "prepack": "rm -rf dist && pnpm build",
     "test": "pnpm run /^test:/",
     "test:unit": "vitest run",
@@ -52,7 +52,7 @@
     "@types/node": "^20.19.33",
     "eslint": "^10.0.1",
     "publint": "^0.3.17",
-    "tsup": "^8.5.1",
+    "tsdown": "^0.20.3",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   }

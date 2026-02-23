@@ -1,5 +1,3 @@
-#! /usr/bin/env node
-
 import { killEmAll, type KillEmAllOptions } from ".";
 
 const args = process.argv.slice(2);

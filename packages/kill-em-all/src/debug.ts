@@ -9,7 +9,7 @@ const shouldDebug =
 	debugEnv.includes("kill-em-all:*") ||
 	debugEnv.includes("*");
 
-export function debug(...args: any[]) {
+export function debug(...args: any[]): void {
 	if (shouldDebug) {
 		console.error(`[kill-em-all] ${new Date().toISOString()}`, ...args);
 	}

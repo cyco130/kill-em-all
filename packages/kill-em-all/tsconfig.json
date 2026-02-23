@@ -2,10 +2,10 @@
 	"compilerOptions": {
 		"noEmit": true,
 
-		"allowJs": true,
-		"checkJs": true,
+		"declaration": true,
 		"forceConsistentCasingInFileNames": true,
 		"skipLibCheck": true,
+		"isolatedDeclarations": true,
 
 		"strict": true,
 		"noImplicitOverride": true,
