@@ -44,6 +44,9 @@
     "macos",
     "wmic"
   ],
+  "engines": {
+    "node": "20 || 22 || 24 || 25"
+  },
   "devDependencies": {
     "@cyco130/eslint-config": "^6.2.1",
     "@types/node": "^20.19.33",
