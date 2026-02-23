@@ -8,7 +8,7 @@ const config: UserConfig[] = [
 		platform: "node",
 		target: "node20",
 		sourcemap: true,
-		dts: { oxc: true },
+		dts: true,
 	},
 ];
 
