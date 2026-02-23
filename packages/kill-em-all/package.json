@@ -24,7 +24,6 @@
     "dev": "tsdown --watch",
     "prepack": "rm -rf dist && pnpm build",
     "test": "pnpm run /^test:/",
-    "test:unit": "vitest run",
     "test:typecheck": "tsc -p tsconfig.json --noEmit",
     "test:lint": "eslint . --max-warnings 0 --ignore-pattern dist",
     "test:package": "publint"
@@ -53,7 +52,6 @@
     "eslint": "^10.0.1",
     "publint": "^0.3.17",
     "tsdown": "^0.20.3",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "typescript": "^5.9.3"
   }
 }
