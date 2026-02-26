@@ -66,12 +66,7 @@ export async function killProcesses(
 	debug(`Set up initial timeout of ${timeoutMs} ms`);
 	await Promise.all(pids.map((pid) => killProcess(pid, signal, timeout)));
 
-	if (
-		timeout.aborted &&
-		forceKillAfterTimeout &&
-		signal !== "SIGKILL" &&
-		signal !== 9
-	) {
+	if (timeout.aborted && forceKillAfterTimeout && signal !== "SIGKILL" && signal !== 9) {
 		timeout = AbortSignal.timeout(forceKillTimeoutMs);
 		debug(`Set up force kill timeout of ${forceKillTimeoutMs} ms`);
 		await Promise.all(pids.map((pid) => killProcess(pid, "SIGKILL", timeout)));
@@ -91,10 +86,7 @@ async function killProcess(
 
 	try {
 		debug(`Sending signal ${signal} to process ${pid}`);
-		if (
-			process.platform === "win32" &&
-			(signal === "SIGKILL" || signal === 9)
-		) {
+		if (process.platform === "win32" && (signal === "SIGKILL" || signal === 9)) {
 			// On Windows, taskkill /F is more reliable
 			await safeExec(`taskkill /PID ${pid} /F`);
 		} else {
@@ -103,13 +95,8 @@ async function killProcess(
 	} catch (err) {
 		const nodeErr = err as NodeJS.ErrnoException;
 		// Process might have already exited
-		if (
-			nodeErr.code === "ESRCH" ||
-			(process.platform === "win32" && nodeErr.code === "EPERM")
-		) {
-			debug(
-				`Process ${pid} does not exist or cannot be accessed, it might have already exited.`,
-			);
+		if (nodeErr.code === "ESRCH" || (process.platform === "win32" && nodeErr.code === "EPERM")) {
+			debug(`Process ${pid} does not exist or cannot be accessed, it might have already exited.`);
 			killed = true;
 		} else {
 			throw err;
@@ -150,10 +137,7 @@ async function killProcess(
 			await new Promise((resolve) => setTimeout(resolve, 100));
 		} catch (err) {
 			const nodeErr = err as NodeJS.ErrnoException;
-			if (
-				nodeErr.code === "ESRCH" ||
-				(process.platform === "win32" && nodeErr.code === "EPERM")
-			) {
+			if (nodeErr.code === "ESRCH" || (process.platform === "win32" && nodeErr.code === "EPERM")) {
 				// Process does not exist anymore, break the loop
 				debug(`Process ${pid} does not exist anymore, it might have exited.`);
 				break;
@@ -171,9 +155,7 @@ async function killProcess(
  *
  * @param rootPid The root process ID.
  */
-export async function getRecursiveChildProcesses(
-	rootPid: number,
-): Promise<number[]> {
+export async function getRecursiveChildProcesses(rootPid: number): Promise<number[]> {
 	const allPids: number[] = [];
 	const stack: number[] = [rootPid];
 
@@ -406,10 +388,7 @@ export async function launchAndTest(
 
 	const allPids = await getRecursiveChildProcesses(pid!);
 
-	return async function cleanup(
-		signal?: NodeJS.Signals,
-		options?: KillEmAllOptions,
-	) {
+	return async function cleanup(signal?: NodeJS.Signals, options?: KillEmAllOptions) {
 		await killProcesses(allPids, signal, options);
 	};
 }
