@@ -1,14 +1,29 @@
 {
   "name": "kill-em-all",
   "version": "0.0.5",
-  "type": "module",
+  "description": "A utility to kill a process and all its child processes and wait for them to exit",
+  "keywords": [
+    "kill",
+    "linux",
+    "macos",
+    "process",
+    "process tree",
+    "signal",
+    "terminate",
+    "tree",
+    "windows",
+    "wmic"
+  ],
+  "license": "MIT",
+  "repository": "github:cyco130/kill-em-all",
+  "bin": {
+    "kill-em-all": "./cli.js"
+  },
   "files": [
     "dist",
     "*.d.ts"
   ],
-  "exports": {
-    ".": "./dist/index.js"
-  },
+  "type": "module",
   "typesVersions": {
     "*": {
       "*": [
@@ -16,8 +31,8 @@
       ]
     }
   },
-  "bin": {
-    "kill-em-all": "./cli.js"
+  "exports": {
+    ".": "./dist/index.js"
   },
   "scripts": {
     "build": "tsdown --clean",
@@ -28,24 +43,6 @@
     "test:lint": "eslint . --max-warnings 0 --ignore-pattern dist",
     "test:package": "publint"
   },
-  "description": "A utility to kill a process and all its child processes and wait for them to exit",
-  "license": "MIT",
-  "repository": "github:cyco130/kill-em-all",
-  "keywords": [
-    "kill",
-    "process",
-    "tree",
-    "process tree",
-    "terminate",
-    "signal",
-    "windows",
-    "linux",
-    "macos",
-    "wmic"
-  ],
-  "engines": {
-    "node": "20 || 22 || 24 || 25"
-  },
   "devDependencies": {
     "@cyco130/eslint-config": "^6.2.1",
     "@types/node": "^20.19.33",
@@ -53,5 +50,8 @@
     "publint": "^0.3.17",
     "tsdown": "^0.20.3",
     "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": "20 || 22 || 24 || 25"
   }
 }

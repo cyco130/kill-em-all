@@ -5,9 +5,7 @@ const debugEnv = (process.env.DEBUG ?? "")
 	.filter((s) => s !== "");
 
 const shouldDebug =
-	debugEnv.includes("kill-em-all") ||
-	debugEnv.includes("kill-em-all:*") ||
-	debugEnv.includes("*");
+	debugEnv.includes("kill-em-all") || debugEnv.includes("kill-em-all:*") || debugEnv.includes("*");
 
 export function debug(...args: any[]): void {
 	if (shouldDebug) {
