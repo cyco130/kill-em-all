@@ -61,7 +61,9 @@ async function doTest(mode: "library" | "CLI") {
 			attempts++;
 			if (attempts > maxAttempts) {
 				clearInterval(interval);
-				reject(new Error("Server did not become ready within the expected time"));
+				reject(
+					new Error("Server did not become ready within the expected time"),
+				);
 				return;
 			}
 
@@ -80,9 +82,12 @@ async function doTest(mode: "library" | "CLI") {
 	if (mode === "library") {
 		await killEmAll(pid, "SIGINT", { timeoutMs: KILL_TIMEOUT });
 	} else {
-		execSync(`pnpm exec kill-em-all ${pid} --signal SIGINT --timeout ${KILL_TIMEOUT}`, {
-			stdio: "inherit",
-		});
+		execSync(
+			`pnpm exec kill-em-all ${pid} --signal SIGINT --timeout ${KILL_TIMEOUT}`,
+			{
+				stdio: "inherit",
+			},
+		);
 	}
 
 	console.log("All processes killed");
