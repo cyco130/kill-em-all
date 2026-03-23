@@ -10,6 +10,6 @@
     "cross-env": "^10.1.0",
     "kill-em-all": "workspace:*",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.0"
   }
 }
