@@ -19,7 +19,8 @@
 		"customConditions": ["import"],
 
 		"target": "es2022",
-		"lib": ["es2022"]
+		"lib": ["es2022"],
+		"types": ["node"]
 	},
 	"exclude": ["node_modules", "dist"]
 }
