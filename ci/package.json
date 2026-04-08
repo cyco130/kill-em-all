@@ -6,10 +6,10 @@
     "ci": "cross-env DEBUG=kill-em-all vitest --reporter=verbose run"
   },
   "dependencies": {
-    "@types/node": "^20.19.37",
+    "@types/node": "^20.19.39",
     "cross-env": "^10.1.0",
     "kill-em-all": "workspace:*",
     "typescript": "^6.0.2",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.3"
   }
 }
