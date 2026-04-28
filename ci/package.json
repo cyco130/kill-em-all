@@ -9,7 +9,7 @@
     "@types/node": "^20.19.39",
     "cross-env": "^10.1.0",
     "kill-em-all": "workspace:*",
-    "typescript": "^6.0.2",
-    "vitest": "^4.1.4"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
   }
 }
