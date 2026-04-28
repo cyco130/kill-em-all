@@ -1,4 +1,4 @@
-import { killEmAll, type KillEmAllOptions } from ".";
+import { killEmAll, type KillEmAllOptions } from "./index.ts";
 
 const args = process.argv.slice(2);
 

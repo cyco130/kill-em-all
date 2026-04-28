@@ -1,5 +1,5 @@
 import { ChildProcess, exec, spawn } from "node:child_process";
-import { debug } from "./debug";
+import { debug } from "./debug.ts";
 import { promisify } from "node:util";
 
 const execAsync = promisify(exec);
