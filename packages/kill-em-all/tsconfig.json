@@ -16,6 +16,7 @@
 		"isolatedModules": true,
 		"moduleDetection": "force",
 		"resolveJsonModule": true,
+		"allowImportingTsExtensions": true,
 		"customConditions": ["import"],
 
 		"target": "es2022",
