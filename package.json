@@ -6,15 +6,15 @@
     "build": "pnpm -r --filter \"./packages/*\" run build",
     "prepare": "husky",
     "precommit": "lint-staged",
-    "format": "prettier --ignore-unknown . '!pnpm-lock.yaml' --write",
+    "format": "prettier --write .",
     "ci": "pnpm -r --stream run ci",
     "test": "pnpm run /^test:/",
     "test:packages": "pnpm -r --stream run test",
-    "test:format": "prettier --ignore-unknown . '!pnpm-lock.yaml' --check"
+    "test:format": "prettier --check ."
   },
   "devDependencies": {
     "husky": "^9.1.7",
-    "lint-staged": "^16.4.0",
+    "lint-staged": "^17.0.4",
     "prettier": "^3.8.3",
     "typescript": "^6.0.3"
   }

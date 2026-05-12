@@ -1,12 +1,12 @@
 {
-  "name": "ci-react-vite-plugin-mdx",
+  "name": "kill-em-all-ci",
   "private": true,
   "type": "module",
   "scripts": {
     "ci": "cross-env DEBUG=kill-em-all vitest --reporter=verbose run"
   },
   "dependencies": {
-    "@types/node": "^20.19.39",
+    "@types/node": "^22.19.19",
     "cross-env": "^10.1.0",
     "kill-em-all": "workspace:*",
     "typescript": "^6.0.3",
