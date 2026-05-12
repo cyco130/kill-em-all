@@ -1,16 +1,17 @@
 {
 	"trailingComma": "all",
+	"printWidth": 80,
 	"useTabs": true,
 	"overrides": [
 		{
-			"files": "**/*.md",
+			"files": ["**/*.md"],
 			"options": {
 				"tabWidth": 2,
 				"useTabs": false
 			}
 		},
 		{
-			"files": "**/package.json",
+			"files": ["**/package.json"],
 			"options": {
 				"tabWidth": 2,
 				"useTabs": false
