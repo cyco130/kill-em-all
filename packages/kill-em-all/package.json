@@ -44,11 +44,11 @@
     "test:package": "publint"
   },
   "devDependencies": {
-    "@cyco130/eslint-config": "^9.0.1",
-    "@types/node": "^22.19.19",
+    "@cyco130/eslint-config": "^9.0.2",
+    "@types/node": "^22.19.20",
     "eslint": "^10.4.1",
     "publint": "^0.3.21",
-    "tsdown": "^0.22.1",
+    "tsdown": "^0.22.2",
     "typescript": "^6.0.3"
   },
   "engines": {
