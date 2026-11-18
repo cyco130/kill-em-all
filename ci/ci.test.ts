@@ -5,7 +5,7 @@ import { killEmAll, launchAndTest } from "kill-em-all";
 const TEST_TIMEOUT = 60_000; // 60 seconds
 const KILL_TIMEOUT = 10_000; // 10 seconds
 
-test.sequential(
+test(
 	"works as a library",
 	async () => {
 		await doTest("library");
@@ -13,7 +13,7 @@ test.sequential(
 	TEST_TIMEOUT,
 );
 
-test.sequential(
+test(
 	"works as a CLI",
 	async () => {
 		await doTest("CLI");
@@ -21,7 +21,7 @@ test.sequential(
 	TEST_TIMEOUT,
 );
 
-test.sequential(
+test(
 	"launchAndTest",
 	async () => {
 		const kill = await launchAndTest("node ./a.js", "http://localhost:3000");
