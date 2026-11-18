@@ -88,8 +88,10 @@ try {
 ## CLI usage:
 
 ```bash
-npx kill-em-all <pid> [--signal <signal>] [--timeout <ms>] [--force-kill-after-timeout] [--force-kill-timeout <ms>]
+npx kill-em-all <pid> [--signal <signal>] [--timeout <ms>] [--[no-]force-kill-after-timeout] [--force-kill-timeout <ms>]
 ```
+
+If the processes are still running after `--timeout` (5000 ms by default), they are force killed with `SIGKILL`. Pass `--no-force-kill-after-timeout` to exit with an error instead.
 
 ## Debugging
 
