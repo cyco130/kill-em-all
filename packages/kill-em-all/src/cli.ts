@@ -6,7 +6,7 @@ const args = process.argv.slice(2);
 function printUsageAndExit(code: number): never {
 	// eslint-disable-next-line no-console
 	console.log(
-		`Usage: kill-em-all <pid> [--signal <signal>] [--timeout <ms>] [--force-kill-after-timeout] [--force-kill-timeout <ms>]`,
+		`Usage: kill-em-all <pid> [--signal <signal>] [--timeout <ms>] [--[no-]force-kill-after-timeout] [--force-kill-timeout <ms>]`,
 	);
 	process.exit(code);
 }
@@ -20,6 +20,8 @@ const optionsConfig = {
 	signal: { type: "string", short: "s" },
 	timeout: { type: "string", short: "t" },
 	"force-kill-after-timeout": { type: "boolean", short: "f" },
+	// Declared by hand instead of with `allowNegative`, which needs Node 22.4
+	"no-force-kill-after-timeout": { type: "boolean" },
 	"force-kill-timeout": { type: "string", short: "F" },
 	help: { type: "boolean", short: "h" },
 } as const;
@@ -104,9 +106,23 @@ const signalArg = stringOption("signal") ?? "SIGTERM";
 const signalNum = Number(signalArg);
 const signal = isNaN(signalNum) ? (signalArg as NodeJS.Signals) : signalNum;
 
+// Force killing is on by default. If both forms are given, the last one wins.
+let forceKillAfterTimeout = true;
+for (const token of tokens) {
+	if (token.kind !== "option") {
+		continue;
+	}
+
+	if (token.name === "force-kill-after-timeout") {
+		forceKillAfterTimeout = true;
+	} else if (token.name === "no-force-kill-after-timeout") {
+		forceKillAfterTimeout = false;
+	}
+}
+
 const options: KillEmAllOptions = {
 	timeoutMs: timeoutOption("timeout", 5000),
-	forceKillAfterTimeout: true,
+	forceKillAfterTimeout,
 	forceKillTimeoutMs: timeoutOption("force-kill-timeout", 5000),
 };
 
